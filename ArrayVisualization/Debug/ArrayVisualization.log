@@ -1,0 +1,5 @@
+﻿  ArrayVisualization.cpp
+E:\VisualStudioProjects\ArrayVisualization\ArrayVisualization\ArrayVisualization.cpp(164,76): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+E:\VisualStudioProjects\ArrayVisualization\ArrayVisualization\ArrayVisualization.cpp(164,29): warning C4244: аргумент: преобразование "float" в "int", возможна потеря данных
+E:\VisualStudioProjects\ArrayVisualization\ArrayVisualization\ArrayVisualization.cpp(320,59): warning C4244: =: преобразование "double" в "int", возможна потеря данных
+  ArrayVisualization.vcxproj -> E:\VisualStudioProjects\ArrayVisualization\Debug\ArrayVisualization.exe
