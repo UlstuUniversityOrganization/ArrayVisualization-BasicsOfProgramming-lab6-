@@ -8,6 +8,17 @@
 
 #define MAX_LOADSTRING 100
 
+enum class Task
+{
+    A = 0,
+    B = 1,
+    C = 2,
+    D = 3,
+    Arbitrary = 4
+};
+
+Task task = Task::Arbitrary;
+
 // Глобальные переменные:
 HINSTANCE hInst;                                // текущий экземпляр
 WCHAR szTitle[MAX_LOADSTRING];                  // Текст строки заголовка
@@ -104,6 +115,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    return TRUE;
 }
 
+
+
 void DrawTriangle(HDC hdc, POINT v1, POINT v2, POINT v3)
 {
     POINT point[3] =
@@ -141,8 +154,9 @@ void PlotGraph(HDC hdc, int left, int top, int right, int bottom, int* num, int 
     float height = (float)(bottom - top);
     float elementWidht = width / elementsCount;
 
-    HBRUSH positiveBrush = CreateSolidBrush(RGB(255, 100, 100));
-    HBRUSH negativeBrush = CreateSolidBrush(RGB(100, 100, 255));
+    HBRUSH positiveBrush = CreateSolidBrush(RGB(100, 100, 255));
+    HBRUSH negativeBrush = CreateSolidBrush(RGB(255, 100, 100));
+
 
     HBRUSH minBrush = CreateSolidBrush(RGB(100, 255, 100));
     HBRUSH maxBrush = CreateSolidBrush(RGB(100, 255, 100));
@@ -161,7 +175,7 @@ void PlotGraph(HDC hdc, int left, int top, int right, int bottom, int* num, int 
         else if (i == maxID)
             SelectObject(hdc, maxBrush);
 
-        Rectangle(hdc, left + i * elementWidht, bottom - num[i] * 10, left + (i + 1) * elementWidht, bottom);
+        Rectangle(hdc, left + i * elementWidht, bottom - (num[i] / 20.0f) * (bottom - top), left + (i + 1) * elementWidht, bottom);
     }
 
 }
@@ -276,8 +290,13 @@ void TaskD(int* array, int elementsCount, int** newArray, int* newElementsCount)
 
 int* num;
 int elementsCount = 0;
+int* num2;
+int elementsCount2 = 0;
 int minID = -1;
 int maxID = -1;
+
+
+
 void GetArrayFromFile(int** array, int* elementsCount)
 {
     FILE* filePointer;
@@ -290,27 +309,6 @@ void GetArrayFromFile(int** array, int* elementsCount)
         fscanf_s(filePointer, "%d", &(*array)[i]);
 }
 
-void UseTaskC()
-{
-    GetArrayFromFile(&num, &elementsCount);
-    int* newNum;
-    int newElementsCount = 0;
-    TaskC(num, elementsCount, &newNum, &newElementsCount);
-    delete[elementsCount] num;
-    num = newNum;
-    elementsCount = newElementsCount;
-}
-
-void UseTaskD()
-{
-    GetArrayFromFile(&num, &elementsCount);
-    int* newNum;
-    int newElementsCount = 0;
-    TaskD(num, elementsCount, &newNum, &newElementsCount);
-    delete[elementsCount] num;
-    num = newNum;
-    elementsCount = newElementsCount;
-}
 
 void PlotArbitraryGraph()
 {
@@ -326,15 +324,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     {
     case WM_CREATE:
     {
-        //PlotArbitraryGraph();
-
-        //GetArrayFromFile(&num, &elementsCount);
-
-        //TaskA(num, elementsCount);
-        //TaskB(num, elementsCount, &minID, &maxID);
-        //UseTaskC();
-        //UseTaskD();
-
+        switch (task)
+        {
+        case Task::Arbitrary:
+        {
+            PlotArbitraryGraph();
+            break;
+        }
+        case Task::A:
+        {
+            GetArrayFromFile(&num, &elementsCount);
+            TaskA(num, elementsCount);
+            break;
+        }
+        case Task::B:
+        {
+            GetArrayFromFile(&num, &elementsCount);
+            TaskB(num, elementsCount, &minID, &maxID);
+            break;
+        }
+        case Task::C:
+        {
+            GetArrayFromFile(&num, &elementsCount);
+            TaskC(num, elementsCount, &num2, &elementsCount2);
+            break;
+        }
+        case Task::D:
+        {
+            GetArrayFromFile(&num, &elementsCount);
+            TaskD(num, elementsCount, &num2, &elementsCount2);
+            break;
+        }
+        }
         break;
     }
     case WM_COMMAND:
@@ -361,8 +382,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
 
-            PlotGraph(hdc, 100, 100, 1000, 500, num, elementsCount, minID, maxID);
+            RECT client;
+            GetClientRect(hWnd, &client);
+            int width = client.right - client.left;
+            int height = client.bottom - client.top;
 
+            if (task == Task::C || task == Task::D)
+            {
+                RECT client;
+                GetClientRect(hWnd, &client);
+
+                PlotGraph(hdc, width * 0.05f, height * 0.3f, width * 0.4f, height * 0.7f, num, elementsCount, minID, maxID);
+                PlotGraph(hdc, width * 0.6f, height * 0.3f, width - width * 0.05f, height * 0.7f, num2, elementsCount2, minID, maxID);
+            }
+            else 
+                PlotGraph(hdc, width * 0.25f, height * 0.3f, width * 0.75f, height * 0.7f, num, elementsCount, minID, maxID);
             EndPaint(hWnd, &ps);
         }
         break;
